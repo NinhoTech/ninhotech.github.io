@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive AI-Assisted SDLC Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 
+    Chosen Palette: Warm Neutrals with a Tech Blue Accent. Background: slate-50/gray-900, Text: slate-700/gray-300, Accent: blue-600/blue-700. This creates a calm, professional, and trustworthy feel suitable for a corporate technology roadmap, adaptable for both light and dark modes.
+    Application Structure Plan: The SPA is structured thematically to guide the user from the high-level vision to specific details. It starts with the 'Why' (Vision), moves to the 'How' (Interactive Roadmap/Timeline), and then allows deep dives into each phase. The interactive timeline is the central navigation element, replacing linear slides with user-driven exploration. This non-linear approach is better for usability as users can jump to the section most relevant to them. Clicking a phase dynamically displays its detailed content, preventing information overload. Key concepts like 'Guiding Principles' are highlighted in a distinct card section to emphasize their importance.
+    Visualization & Content Choices: 
+    - Report Info: Roadmap Phases -> Goal: Show process/change -> Viz: Interactive HTML/CSS Timeline -> Interaction: Click to reveal phase details -> Justification: More engaging than static slides, provides clear navigation, and shows the progression over time. Method: Vanilla JS for event handling.
+    - Report Info: KPIs (Velocity, Quality, etc.) in Phase 2 -> Goal: Compare/Inform -> Viz: Bar Chart -> Interaction: Buttons to switch between different KPI datasets -> Justification: Makes abstract metrics tangible and visually comparable. Shows potential impact clearly. Library: Chart.js.
+    - Report Info: Initiatives within each phase -> Goal: Organize/Inform -> Viz: Card-based layout -> Interaction: Static display -> Justification: Cards are a modern, scannable way to present distinct chunks of information. Method: Tailwind CSS Grid.
+    - Report Info: SDLC-specific integrations in Phase 2 -> Goal: Organize/Drill-down -> Viz: Tabbed Interface -> Interaction: Click tabs to show content -> Justification: Prevents a long, overwhelming list. Organizes detailed information logically by SDLC stage. Method: Vanilla JS.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .phase-btn.active { background-color: #2563eb; color: white; }
+        .phase-btn.active .phase-circle { background-color: white; border-color: #2563eb; }
+        .phase-btn.active .phase-circle-inner { background-color: #2563eb; }
+        .kpi-btn.active { background-color: #1d4ed8; color: white; }
+        .tab-btn.active { border-color: #2563eb; color: #2563eb; background-color: #dbeafe; }
+
+        /* Dark mode specific styles for elements not easily covered by Tailwind's dark: prefix or requiring JS manipulation */
+        html.dark .phase-btn.active { background-color: #1e40af; } /* Darker blue for active button in dark mode */
+        html.dark .phase-btn.active .phase-circle { background-color: #1e40af; border-color: #1e40af; }
+        html.dark .phase-btn.active .phase-circle-inner { background-color: #a7f3d0; } /* Lighter dot for contrast */
+        html.dark .kpi-btn.active { background-color: #1e40af; }
+        html.dark .tab-btn.active { border-color: #1e40af; color: #93c5fd; background-color: #1e3a8a; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700 dark:bg-gray-900 dark:text-gray-300 transition-colors duration-300">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 dark:bg-gray-800 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-gray-100">AI-Assisted SDLC Roadmap</h1>
+                <nav class="flex items-center">
+                    <a href="#vision" class="text-sm md:text-base font-medium text-slate-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Vision</a>
+                    <a href="#roadmap" class="ml-4 md:ml-8 text-sm md:text-base font-medium text-slate-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Roadmap</a>
+                    <a href="#commitment" class="ml-4 md:ml-8 text-sm md:text-base font-medium text-slate-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Commitment</a>
+                    <button id="theme-toggle" class="ml-4 md:ml-8 p-2 rounded-full bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors duration-300">
+                        <span id="theme-icon">💡</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="vision" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-gray-100 mb-4">Augmenting Engineering Capabilities</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 dark:text-gray-400">
+                Our core philosophy is to empower our engineers. We are strategically integrating AI to automate repetitive tasks, improve quality, and foster innovation, allowing our talented teams to focus on high-impact, creative problem-solving.
+            </p>
+        </section>
+
+        <section id="principles" class="mb-16">
+            <div class="bg-white p-8 rounded-xl shadow-md border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-slate-900 dark:text-gray-100 text-center mb-1">Our Guiding Principle</h3>
+                <h4 class="text-3xl font-bold text-blue-600 dark:text-blue-400 text-center mb-6">Aligned Autonomy</h4>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                        <div class="text-4xl mb-2">🚀</div>
+                        <h5 class="font-bold text-slate-800 dark:text-gray-200 text-lg">Empowering Teams</h5>
+                        <p class="text-sm dark:text-gray-400">Freedom to explore and adopt the best AI tools for the job.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                        <div class="text-4xl mb-2">🧭</div>
+                        <h5 class="font-bold text-slate-800 dark:text-gray-200 text-lg">Clear Framework</h5>
+                        <p class="text-sm dark:text-gray-400">Defined guidelines and structures to ensure strategic alignment.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                        <div class="text-4xl mb-2">🤝</div>
+                        <h5 class="font-bold text-slate-800 dark:text-gray-200 text-lg">Robust Support</h5>
+                        <p class="text-sm dark:text-gray-400">Providing resources, training, and a collaborative environment.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                        <div class="text-4xl mb-2">⚖️</div>
+                        <h5 class="font-bold text-slate-800 dark:text-gray-200 text-lg">Finding Balance</h5>
+                        <p class="text-sm dark:text-gray-400">Fostering team-level innovation with organizational consistency.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-gray-100 text-center mb-8">An Interactive Roadmap</h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-lg dark:text-gray-400">
+                Our journey is structured in three phases. Click on a phase below to explore its goals, key initiatives, and expected outcomes.
+            </p>
+            <div class="relative">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-300 dark:bg-gray-600 transform -translate-y-1/2"></div>
+                <div class="relative flex justify-between">
+                    <button id="btn-phase1" class="phase-btn text-center w-1/3" data-phase="1">
+                        <div class="relative flex flex-col items-center">
+                            <div class="phase-circle w-8 h-8 rounded-full bg-white border-4 border-slate-300 dark:bg-gray-800 dark:border-gray-600 flex items-center justify-center transition-all duration-300">
+                                <div class="phase-circle-inner w-3 h-3 rounded-full bg-slate-300 dark:bg-gray-600 transition-all duration-300"></div>
+                            </div>
+                            <div class="mt-3 px-2 py-1 rounded-md font-semibold transition-all duration-300 dark:text-gray-300">Phase 1</div>
+                            <div class="text-sm text-slate-500 dark:text-gray-400">Q3-Q4 2025</div>
+                        </div>
+                    </button>
+                    <button id="btn-phase2" class="phase-btn text-center w-1/3" data-phase="2">
+                        <div class="relative flex flex-col items-center">
+                            <div class="phase-circle w-8 h-8 rounded-full bg-white border-4 border-slate-300 dark:bg-gray-800 dark:border-gray-600 flex items-center justify-center transition-all duration-300">
+                                <div class="phase-circle-inner w-3 h-3 rounded-full bg-slate-300 dark:bg-gray-600 transition-all duration-300"></div>
+                            </div>
+                            <div class="mt-3 px-2 py-1 rounded-md font-semibold transition-all duration-300 dark:text-gray-300">Phase 2</div>
+                            <div class="text-sm text-slate-500 dark:text-gray-400">Q1-Q3 2026</div>
+                        </div>
+                    </button>
+                    <button id="btn-phase3" class="phase-btn text-center w-1/3" data-phase="3">
+                        <div class="relative flex flex-col items-center">
+                           <div class="phase-circle w-8 h-8 rounded-full bg-white border-4 border-slate-300 dark:bg-gray-800 dark:border-gray-600 flex items-center justify-center transition-all duration-300">
+                                <div class="phase-circle-inner w-3 h-3 rounded-full bg-slate-300 dark:bg-gray-600 transition-all duration-300"></div>
+                            </div>
+                            <div class="mt-3 px-2 py-1 rounded-md font-semibold transition-all duration-300 dark:text-gray-300">Phase 3</div>
+                            <div class="text-sm text-slate-500 dark:text-gray-400">Q4 2026+</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div id="phase-details">
+            <div id="phase1-content" class="phase-content hidden">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-gray-100 mb-2">Phase 1: Experimentation & Learning</h3>
+                    <p class="text-slate-600 dark:text-gray-400 mb-6">Goal: Build foundational knowledge and identify promising use cases through hands-on exploration without pressure.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">AI Exploration Guild</h4>
+                            <p class="text-sm dark:text-gray-400">Launch a Community of Practice for peer learning and sharing findings.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Sandbox Environments</h4>
+                            <p class="text-sm dark:text-gray-400">Provide curated AI tools and dedicated time (10-20%) for experimentation on non-critical tasks.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Foundational Training</h4>
+                            <p class="text-sm dark:text-gray-400">Cover LLM basics, prompt engineering, and ethical AI use to build a common understanding.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600 md:col-span-2 lg:col-span-3">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Focus on Qualitative KPIs</h4>
+                            <p class="text-sm dark:text-gray-400">Success in this phase is measured by engagement: the number of experiments run, the diversity of tools explored, and the quality of engineer feedback and identified use cases.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200 dark:bg-gray-800 dark:border-gray-700 mt-8">
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-gray-100 mb-4">✨ AI Use Case Generator</h3>
+                        <p class="text-slate-600 dark:text-gray-400 mb-4">Enter an SDLC stage (e.g., "Requirements", "Testing") and get AI-suggested use cases.</p>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <input type="text" id="sdlcStageInput" placeholder="e.g., Requirements, Testing" class="flex-grow p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <button id="generateUseCasesBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                                Generate Use Cases
+                                <span id="useCaseLoading" class="hidden ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                            </button>
+                        </div>
+                        <div id="useCasesOutput" class="bg-slate-50 p-4 rounded-lg border border-slate-200 min-h-[100px] text-sm text-slate-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 whitespace-pre-wrap"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="phase2-content" class="phase-content hidden">
+                 <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-gray-100 mb-2">Phase 2: Targeted Adoption & Integration</h3>
+                    <p class="text-slate-600 dark:text-gray-400 mb-6">Goal: Systematically integrate proven AI tools and practices into our SDLC to realize tangible benefits.</p>
+                    
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-semibold text-slate-800 dark:text-gray-200 mb-4">SDLC-Specific Integrations</h4>
+                            <p class="mb-4 text-sm dark:text-gray-400">We will embed AI capabilities across the entire software development lifecycle. Select a stage to see examples:</p>
+                            <div id="tabs-container" class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 dark:border-gray-700"></div>
+                            <div id="tabs-content-container"></div>
+                        </div>
+                        <div>
+                             <h4 class="text-xl font-semibold text-slate-800 dark:text-gray-200 mb-4">Measuring Our Impact</h4>
+                             <p class="mb-4 text-sm dark:text-gray-400">In this phase, we shift to measuring quantitative improvements. This chart illustrates our target KPIs. Click to switch views.</p>
+                             <div class="flex flex-wrap justify-center gap-2 mb-4">
+                                <button class="kpi-btn text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" data-kpi="quality">Quality & Defects</button>
+                                <button class="kpi-btn text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" data-kpi="velocity">Velocity</button>
+                                <button class="kpi-btn text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" data-kpi="testing">Test Coverage</button>
+                             </div>
+                             <div class="chart-container">
+                                <canvas id="kpiChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="phase3-content" class="phase-content hidden">
+                 <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-gray-100 mb-2">Phase 3: Impact & Optimization</h3>
+                    <p class="text-slate-600 dark:text-gray-400 mb-6">Goal: Maximize the long-term impact of AI, drive continuous improvement, and explore advanced, custom applications.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Advanced AI Applications</h4>
+                            <p class="text-sm dark:text-gray-400">Develop custom tools, including an internal knowledge-base AI and fine-tuned models trained on our codebase.</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Continuous Improvement</h4>
+                            <p class="text-sm dark:text-gray-400">Establish a dedicated AI engineering team to curate tools and support a robust feedback loop.</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Strategic Workforce Evolution</h4>
+                            <p class="text-sm dark:text-gray-400">Focus on upskilling engineers in high-value areas like complex system design and creative problem-solving.</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 class="font-bold text-slate-800 dark:text-gray-200">Thought Leadership</h4>
+                            <p class="text-sm dark:text-gray-400">Benchmark against industry best practices and share our learnings with the broader community.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <section id="commitment" class="mt-16 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-gray-100 mb-4">Our Leadership Commitment</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 dark:text-gray-400 mb-8">
+                Technology is only one part of the equation. Our success depends on our people. We are committed to transparent communication, proactive support, and celebrating the innovations our teams drive with these new capabilities.
+            </p>
+            <a href="#" class="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">Ask a Question or Join the Guild</a>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-16 border-t dark:bg-gray-800 dark:border-gray-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-slate-500 dark:text-gray-400">
+            <p>&copy; 2025 Your Company Name. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlElement = document.documentElement;
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+
+            // Initialize theme based on local storage or system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlElement.classList.add('dark');
+                themeIcon.textContent = '🌙';
+            } else {
+                htmlElement.classList.remove('dark');
+                themeIcon.textContent = '💡';
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                if (htmlElement.classList.contains('dark')) {
+                    htmlElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.textContent = '💡';
+                } else {
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.textContent = '🌙';
+                }
+                updateChartColors();
+            });
+
+            const phaseButtons = document.querySelectorAll('.phase-btn');
+            const phaseContents = document.querySelectorAll('.phase-content');
+            let activePhase = null;
+
+            function activatePhase(phaseNumber) {
+                if (activePhase === phaseNumber) {
+                    phaseNumber = null;
+                }
+                
+                activePhase = phaseNumber;
+
+                phaseButtons.forEach(btn => {
+                    if (btn.dataset.phase === phaseNumber) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                phaseContents.forEach(content => {
+                    if (content.id === `phase${phaseNumber}-content`) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+
+                if (phaseNumber === '2' && !kpiChart) {
+                    initKpiChart();
+                } else if (phaseNumber === '2' && kpiChart) {
+                    updateChartColors();
+                }
+            }
+
+            phaseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const phaseNumber = button.dataset.phase;
+                    activatePhase(phaseNumber);
+                });
+            });
+            
+            activatePhase('1');
+
+            // --- Phase 2: Chart Logic ---
+            const kpiChartData = {
+                quality: {
+                    labels: ['Q4 2025', 'Q1 2026', 'Q2 2026', 'Q3 2026'],
+                    datasets: [{
+                        label: 'Critical Defects Found',
+                        data: [100, 85, 60, 40],
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1d4ed8',
+                        borderWidth: 1
+                    }]
+                },
+                velocity: {
+                    labels: ['Q4 2025', 'Q1 2026', 'Q2 2026', 'Q3 2026'],
+                    datasets: [{
+                        label: 'Avg. Feature Cycle Time (Days)',
+                        data: [20, 18, 15, 14],
+                        backgroundColor: '#60a5fa',
+                        borderColor: '#2563eb',
+                        borderWidth: 1
+                    }]
+                },
+                testing: {
+                    labels: ['Q4 2025', 'Q1 2026', 'Q2 2026', 'Q3 2026'],
+                    datasets: [{
+                        label: 'Automated Test Coverage (%)',
+                        data: [65, 75, 85, 90],
+                        backgroundColor: '#93c5fd',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1
+                    }]
+                }
+            };
+
+            let kpiChart = null;
+            const kpiButtons = document.querySelectorAll('.kpi-btn');
+
+            function getChartColors() {
+                const isDarkMode = htmlElement.classList.contains('dark');
+                return {
+                    backgroundColor: isDarkMode ? ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] : ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                    borderColor: isDarkMode ? ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa'] : ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa'],
+                    gridColor: isDarkMode ? '#4a5568' : '#e2e8f0',
+                    textColor: isDarkMode ? '#e2e8f0' : '#4a5568'
+                };
+            }
+
+            function updateChartColors() {
+                if (!kpiChart) return;
+                const colors = getChartColors();
+                kpiChart.data.datasets.forEach(dataset => {
+                    dataset.backgroundColor = colors.backgroundColor;
+                    dataset.borderColor = colors.borderColor;
+                });
+                kpiChart.options.scales.y.grid.color = colors.gridColor;
+                kpiChart.options.scales.x.ticks.color = colors.textColor;
+                kpiChart.options.scales.y.ticks.color = colors.textColor;
+                kpiChart.update();
+            }
+
+            function updateKpiChart(kpiKey) {
+                if (!kpiChart) return;
+                const data = kpiChartData[kpiKey];
+                const colors = getChartColors();
+                kpiChart.data.labels = data.labels;
+                kpiChart.data.datasets = [{
+                    label: data.datasets[0].label,
+                    data: data.datasets[0].data,
+                    backgroundColor: colors.backgroundColor,
+                    borderColor: colors.borderColor,
+                    borderWidth: 1
+                }];
+                kpiChart.options.scales.y.max = kpiKey === 'quality' || kpiKey === 'testing' ? 100 : 25;
+                kpiChart.update();
+
+                kpiButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.kpi === kpiKey);
+                });
+            }
+
+            function initKpiChart() {
+                const ctx = document.getElementById('kpiChart').getContext('2d');
+                const initialColors = getChartColors();
+                kpiChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: kpiChartData.quality.labels,
+                        datasets: [{
+                            label: kpiChartData.quality.datasets[0].label,
+                            data: kpiChartData.quality.datasets[0].data,
+                            backgroundColor: initialColors.backgroundColor,
+                            borderColor: initialColors.borderColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: (context) => context[0].dataset.label,
+                                    label: (context) => `${context.formattedValue}${context.dataset.label.includes('%') ? '%' : ''}`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: initialColors.gridColor },
+                                ticks: { color: initialColors.textColor }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: initialColors.textColor }
+                            }
+                        }
+                    }
+                });
+                updateKpiChart('quality');
+            }
+
+            kpiButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updateKpiChart(button.dataset.kpi);
+                });
+            });
+
+            // --- Phase 2: Tabs Logic ---
+            const tabsData = {
+                Requirements: 'AI assists in generating user stories from high-level features, creating comprehensive acceptance criteria, and identifying ambiguities in specifications.',
+                Design: 'Utilize AI to suggest architectural patterns based on requirements, generate data models, or create initial drafts of sequence diagrams.',
+                Development: 'The core of AI assistance: intelligent code completion, generating boilerplate, refactoring complex functions, and providing contextual debugging help.',
+                Testing: 'Automate the generation of unit, integration, and even end-to-end tests. AI can also create diverse test data and help prioritize test cases.',
+                Deployment: 'AI can generate deployment scripts, analyze pre-deployment logs for potential issues, and assist in creating rollback plans.',
+                Documentation: 'Automatically generate and update API documentation from code comments, create user manual drafts, and summarize technical specifications.'
+            };
+            const tabsContainer = document.getElementById('tabs-container');
+            const tabsContentContainer = document.getElementById('tabs-content-container');
+            let activeTab = 'Development';
+
+            function renderTabs() {
+                tabsContainer.innerHTML = '';
+                Object.keys(tabsData).forEach(tabName => {
+                    const button = document.createElement('button');
+                    button.textContent = tabName;
+                    button.className = 'tab-btn text-sm font-semibold px-4 py-2 rounded-t-lg border-b-2 border-transparent hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors';
+                    if (tabName === activeTab) {
+                        button.classList.add('active');
+                    }
+                    button.addEventListener('click', () => {
+                        activeTab = tabName;
+                        renderTabs();
+                        renderTabContent();
+                    });
+                    tabsContainer.appendChild(button);
+                });
+            }
+            
+            function renderTabContent() {
+                let contentHtml = `<div class="p-4 bg-slate-50 rounded-b-lg rounded-tr-lg border border-t-0 border-slate-200 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">${tabsData[activeTab]}</div>`;
+
+                if (activeTab === 'Development') {
+                    contentHtml += `
+                    <div class="mt-4 bg-white p-6 rounded-xl shadow-md border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                        <h4 class="text-xl font-bold text-slate-900 dark:text-gray-100 mb-4">✨ Code Snippet Explainer</h4>
+                        <p class="text-slate-600 dark:text-gray-400 mb-4">Paste a code snippet and get an AI-powered explanation or improvement suggestions.</p>
+                        <textarea id="codeSnippetInput" rows="8" placeholder="Paste your code here..." class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 mb-4"></textarea>
+                        <button id="explainCodeBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            Explain Code
+                            <span id="codeExplainLoading" class="hidden ml-2 animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                        </button>
+                        <div id="codeExplanationOutput" class="bg-slate-50 p-4 rounded-lg border border-slate-200 min-h-[100px] text-sm text-slate-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 whitespace-pre-wrap mt-4"></div>
+                    </div>
+                    `;
+                }
+                tabsContentContainer.innerHTML = contentHtml;
+
+                if (activeTab === 'Development') {
+                    const codeSnippetInput = document.getElementById('codeSnippetInput');
+                    const explainCodeBtn = document.getElementById('explainCodeBtn');
+                    const codeExplanationOutput = document.getElementById('codeExplanationOutput');
+                    const codeExplainLoading = document.getElementById('codeExplainLoading');
+
+                    explainCodeBtn.addEventListener('click', async () => {
+                        const code = codeSnippetInput.value.trim();
+                        if (!code) {
+                            codeExplanationOutput.textContent = 'Please paste a code snippet.';
+                            return;
+                        }
+
+                        codeExplanationOutput.textContent = '';
+                        codeExplainLoading.classList.remove('hidden');
+                        explainCodeBtn.disabled = true;
+
+                        const prompt = `Explain the following code snippet and suggest any potential improvements:\n\n\`\`\`\n${code}\n\`\`\``;
+                        
+                        try {
+                            let chatHistory = [];
+                            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                            const payload = { contents: chatHistory };
+                            const apiKey = "";
+                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                            const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            const result = await response.json();
+                            if (result.candidates && result.candidates.length > 0 &&
+                                result.candidates[0].content && result.candidates[0].content.parts &&
+                                result.candidates[0].content.parts.length > 0) {
+                                const text = result.candidates[0].content.parts[0].text;
+                                codeExplanationOutput.textContent = text;
+                            } else {
+                                codeExplanationOutput.textContent = 'Could not explain code. Please try again.';
+                            }
+                        } catch (error) {
+                            codeExplanationOutput.textContent = `Error: ${error.message}. Please try again.`;
+                        } finally {
+                            codeExplainLoading.classList.add('hidden');
+                            explainCodeBtn.disabled = false;
+                        }
+                    });
+                }
+            }
+
+            renderTabs();
+            renderTabContent();
+
+            // --- Phase 1: AI Use Case Generator Logic ---
+            const sdlcStageInput = document.getElementById('sdlcStageInput');
+            const generateUseCasesBtn = document.getElementById('generateUseCasesBtn');
+            const useCasesOutput = document.getElementById('useCasesOutput');
+            const useCaseLoading = document.getElementById('useCaseLoading');
+
+            generateUseCasesBtn.addEventListener('click', async () => {
+                const stage = sdlcStageInput.value.trim();
+                if (!stage) {
+                    useCasesOutput.textContent = 'Please enter an SDLC stage.';
+                    return;
+                }
+
+                useCasesOutput.textContent = '';
+                useCaseLoading.classList.remove('hidden');
+                generateUseCasesBtn.disabled = true;
+
+                const prompt = `Suggest 5-7 specific AI use cases for the "${stage}" phase of the Software Development Life Cycle. Format as a numbered list.`;
+                
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        useCasesOutput.textContent = text;
+                    } else {
+                        useCasesOutput.textContent = 'Could not generate use cases. Please try again.';
+                    }
+                } catch (error) {
+                    useCasesOutput.textContent = `Error: ${error.message}. Please try again.`;
+                } finally {
+                    useCaseLoading.classList.add('hidden');
+                    generateUseCasesBtn.disabled = false;
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
